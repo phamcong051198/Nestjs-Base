@@ -1,0 +1,42 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🚀 Đang kiểm tra trước khi push lên remote..."
+
+# === 1. Bắt buộc build thành công ===
+echo "🔨 Đang chạy build..."
+npm run build
+
+if [ $? -ne 0 ]; then
+  echo "❌ Build thất bại! Không thể push khi code chưa build được."
+  echo "   Hãy sửa lỗi build trước."
+  exit 1
+fi
+
+# === 2. Kiểm tra tên branch theo quy ước ===
+echo "🔍 Đang kiểm tra tên branch..."
+
+npx enforce-branch-name '^((feature|fix|hotfix)\/.*|chore\/.*|release\/\d+\.\d+\.\d+|master|develop|staging|staging-phase2)$'
+
+if [ $? -ne 0 ]; then
+  echo "❌ Tên branch không đúng quy ước!"
+  echo ""
+  echo "   Quy ước tên branch:"
+  echo "   • feature/tên-chức-năng"
+  echo "   • fix/sửa-lỗi-gì"
+  echo "   • hotfix/sửa-khẩn-cấp"
+  echo "   • chore/công-việc-nhỏ"
+  echo "   • release/1.2.3"
+  echo "   • master | develop | staging | staging-phase2"
+  echo ""
+  echo "   Ví dụ: feature/login, fix/cart-bug, release/2.0.0"
+  exit 1
+fi
+
+# === Thành công ===
+echo "✅ Tất cả kiểm tra đã PASS!"
+echo "   • Build thành công"
+echo "   • Tên branch hợp lệ"
+echo "🚀 Đang push lên remote..."
+
+exit 0
